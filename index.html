@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS Community Day Speaker Poster Prompt Generator</title>
+  <style>
+    :root {
+      --bg-color: #f5f5f5;
+      --container-bg: #ffffff;
+      --text-color: #333333;
+      --label-color: #444444;
+      --border-color: #dddddd;
+      --element-bg: rgba(0, 0, 0, 0.03);
+      --info-bg: #f0f7ff;
+      --info-border: #cce5ff;
+      --info-text: #004085;
+      --heading-color: #232F3E;
+      --toast-bg: #232F3E;
+      --toast-color: white;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --container-bg: #1e1e1e;
+      --text-color: #e0e0e0;
+      --label-color: #cccccc;
+      --border-color: #444444;
+      --element-bg: rgba(255, 255, 255, 0.05);
+      --info-bg: #1a2a3a;
+      --info-border: #234566;
+      --info-text: #89c2ff;
+      --heading-color: #FF9900;
+      --toast-bg: #FF9900;
+      --toast-color: #121212;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .container {
+      background: var(--container-bg);
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    textarea {
+      width: 100%;
+      height: 300px;
+      margin-top: 1rem;
+      font-family: monospace;
+      padding: 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      resize: vertical;
+      background-color: var(--container-bg);
+      color: var(--text-color);
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+      color: var(--label-color);
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 1rem;
+      background-color: var(--container-bg);
+      color: var(--text-color);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    #generateBtn {
+      background-color: #FF8800;
+      color: white;
+    }
+
+    #copyBtn {
+      background-color: #232F3E;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--toast-bg);
+      color: var(--toast-color);
+      padding: 1rem 2rem;
+      border-radius: 4px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      color: var(--heading-color);
+      margin-bottom: 2rem;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .checkbox-group div {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .checkbox-group input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+    }
+
+    .checkbox-group label {
+      margin: 0;
+      font-weight: normal;
+    }
+
+    #nzElementsContainer,
+    #auElementsContainer,
+    #oceanicElementsContainer,
+    #sgElementsContainer,
+    #phElementsContainer,
+    #bengaluruElementsContainer {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: var(--element-bg);
+      border-radius: 4px;
+    }
+
+    #kiwiStyleContainer,
+    #oceanicKiwiStyleContainer {
+      margin-top: 1rem;
+    }
+
+    .info-box {
+      background-color: var(--info-bg);
+      border: 1px solid var(--info-border);
+      border-radius: 4px;
+      padding: 1rem;
+      margin-top: 0.5rem;
+      color: var(--info-text);
+    }
+
+    .info-box p {
+      margin: 0 0 0.5rem 0;
+    }
+
+    .info-box p:last-child {
+      margin: 0;
+    }
+
+    /* Theme toggle styles */
+    .theme-switch-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 1rem;
+    }
+
+    .theme-switch {
+      display: inline-block;
+      height: 26px;
+      position: relative;
+      width: 50px;
+    }
+
+    .theme-switch input {
+      display: none;
+    }
+
+    .slider {
+      background-color: #ccc;
+      bottom: 0;
+      cursor: pointer;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      background-color: white;
+      bottom: 3px;
+      content: "";
+      height: 20px;
+      left: 4px;
+      position: absolute;
+      transition: .4s;
+      width: 20px;
+      border-radius: 50%;
+    }
+
+    input:checked+.slider {
+      background-color: #FF9900;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(22px);
+    }
+
+    .theme-text {
+      margin-right: 10px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="theme-switch-wrapper">
+      <span class="theme-text">Theme:</span>
+      <select id="themeSelector">
+        <option value="auto">Auto (System Preference)</option>
+        <option value="light">Light Mode</option>
+        <option value="dark">Dark Mode</option>
+      </select>
+    </div>
+
+    <h1>AWS Community Day Speaker Poster Prompt Generator</h1>
+
+    <label>Speaker Name</label>
+    <input id="name" type="text" placeholder="John Doe" />
+
+    <label>Title</label>
+    <select id="title">
+      <option value="Cloud Consultant">Cloud Consultant</option>
+      <option value="Cloud Engineer">Cloud Engineer</option>
+      <option value="Data Scientist">Data Scientist</option>
+      <option value="DevOps Engineer">DevOps Engineer</option>
+      <option value="Full-Stack Developer">Full-Stack Developer</option>
+      <option value="Platform Engineer">Platform Engineer</option>
+      <option value="Senior Solutions Architect">Senior Solutions Architect</option>
+      <option value="Software Engineer">Software Engineer</option>
+      <option value="Solutions Architect">Solutions Architect</option>
+      <option value="Technical Lead">Technical Lead</option>
+      <option value="custom">Custom (specify below)</option>
+    </select>
+    <div id="customTitleContainer" style="display:none; margin-top: 0.5rem;">
+      <input id="customTitle" type="text" placeholder="Enter custom title" />
+    </div>
+
+    <label>Session Title</label>
+    <input id="sessionTitle" type="text" placeholder="Serverless Patterns for Real-Time Insights" />
+
+    <label>Character Creation</label>
+    <select id="characterCreationType">
+      <option value="generated">Auto-Generated Character</option>
+      <option value="reference">Use Reference Photo</option>
+    </select>
+
+    <!-- Auto-generated character options -->
+    <div id="generatedCharacterOptions">
+      <label>Character Appearance</label>
+      <select id="characterGender">
+        <option value="neutral">Gender Neutral</option>
+        <option value="male">Male Presenting</option>
+        <option value="female">Female Presenting</option>
+      </select>
+
+      <label>Character Features</label>
+      <div class="checkbox-group">
+        <div>
+          <input type="checkbox" id="hasGlasses" checked>
+          <label for="hasGlasses">Glasses</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasBeard">
+          <label for="hasBeard">Facial Hair</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasEarrings">
+          <label for="hasEarrings">Earrings</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasNecklace">
+          <label for="hasNecklace">Necklace</label>
+        </div>
+      </div>
+
+      <label>Hair Style</label>
+      <select id="hairStyle">
+        <option value="bald">Bald/Shaven</option>
+        <option value="short">Short Hair</option>
+        <option value="medium">Medium Length</option>
+        <option value="long">Long Hair</option>
+        <option value="spiky">Spiky Hair</option>
+        <option value="flatTop">Flat Top</option>
+        <option value="curly">Curly Hair</option>
+        <option value="afro">Afro</option>
+        <option value="bun">Hair Bun/Topknot</option>
+        <option value="ponytail">Ponytail</option>
+        <option value="undercut">Undercut</option>
+        <option value="sidepart">Side Part</option>
+      </select>
+    </div>
+
+    <!-- Reference photo message -->
+    <div id="referencePhotoOptions" style="display:none;">
+      <div class="info-box">
+        <p>Please include a reference photo in your conversation when submitting the prompt. The AI will use this photo
+          to create a stylized character that resembles the person while maintaining the AWS action figure aesthetic.
+        </p>
+        <p>For best results, provide a clear front-facing photo with good lighting.</p>
+      </div>
+    </div>
+
+    <label>Chest Icon (AWS service)</label>
+    <select id="chestIcon">
+      <option value="API Gateway">API Gateway</option>
+      <option value="AppSync">AppSync</option>
+      <option value="Athena">Athena</option>
+      <option value="Bedrock">Bedrock</option>
+      <option value="CloudFormation">CloudFormation</option>
+      <option value="CloudFront">CloudFront</option>
+      <option value="CloudWatch">CloudWatch</option>
+      <option value="CodeBuild">CodeBuild</option>
+      <option value="CodeDeploy">CodeDeploy</option>
+      <option value="CodePipeline">CodePipeline</option>
+      <option value="Cognito">Cognito</option>
+      <option value="Comprehend">Comprehend</option>
+      <option value="DynamoDB">DynamoDB</option>
+      <option value="EC2">EC2</option>
+      <option value="ECS">ECS</option>
+      <option value="EKS">EKS</option>
+      <option value="EventBridge">EventBridge</option>
+      <option value="Fargate">Fargate</option>
+      <option value="Glue">Glue</option>
+      <option value="IAM">IAM</option>
+      <option value="Kendra">Kendra</option>
+      <option value="Kinesis">Kinesis</option>
+      <option value="Lambda">Lambda (λ)</option>
+      <option value="Lex">Lex</option>
+      <option value="Polly">Polly</option>
+      <option value="QuickSight">QuickSight</option>
+      <option value="RDS">RDS</option>
+      <option value="Rekognition">Rekognition</option>
+      <option value="Redshift">Redshift</option>
+      <option value="Route 53">Route 53</option>
+      <option value="S3">S3</option>
+      <option value="SageMaker">SageMaker</option>
+      <option value="Secrets Manager">Secrets Manager</option>
+      <option value="Shield">Shield</option>
+      <option value="SNS">SNS</option>
+      <option value="SQS">SQS</option>
+      <option value="Step Functions">Step Functions</option>
+      <option value="Transcribe">Transcribe</option>
+      <option value="Translate">Translate</option>
+      <option value="WAF">WAF</option>
+      <option value="X-Ray">X-Ray</option>
+      <option value="AWS">AWS Logo</option>
+    </select>
+    <div id="customIconContainer" style="display:none; margin-top: 0.5rem;">
+      <input id="customIcon" type="text" placeholder="Enter custom AWS service" />
+    </div>
+
+    <label>Location</label>
+    <select id="location">
+      <option value="Aotearoa">New Zealand (Aotearoa)</option>
+      <option value="Oceanic">Oceanic (Remote NZ)</option>
+      <option value="Australia">Australia</option>
+      <option value="Singapore">Singapore</option>
+      <option value="Philippines">Philippines</option>
+      <option value="Bengaluru">Bengaluru (India)</option>
+      <option value="custom">Custom (specify below)</option>
+    </select>
+    <div id="customLocationContainer" style="display:none; margin-top: 0.5rem;">
+      <input id="customLocation" type="text" placeholder="Enter custom location" />
+    </div>
+
+    <!-- New Zealand specific elements (initially visible) -->
+    <div id="nzElementsContainer">
+      <label>New Zealand Elements</label>
+      <div class="checkbox-group">
+        <div>
+          <input type="checkbox" id="showKiwi" checked>
+          <label for="showKiwi">Kiwi Bird</label>
+        </div>
+        <div>
+          <input type="checkbox" id="includeFern" checked>
+          <label for="includeFern">Silver Fern</label>
+        </div>
+        <div>
+          <input type="checkbox" id="includeKoru" checked>
+          <label for="includeKoru">Koru Spiral</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasMountains">
+          <label for="hasMountains">Mountains</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasFlax">
+          <label for="hasFlax">Flax Plant</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasTiki">
+          <label for="hasTiki">Tiki Pattern</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasWave">
+          <label for="hasWave">Ocean Wave</label>
+        </div>
+      </div>
+
+      <div id="kiwiStyleContainer">
+        <label>Kiwi Style</label>
+        <select id="kiwiStyle">
+          <option value="flat">Flat Icon</option>
+          <option value="3d">3D</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Oceanic specific elements (initially hidden) -->
+    <div id="oceanicElementsContainer" style="display:none;">
+      <label>Oceanic Elements (Remote NZ)</label>
+      <div class="checkbox-group">
+        <div>
+          <input type="checkbox" id="oceanicShowKiwi" checked>
+          <label for="oceanicShowKiwi">Kiwi Bird</label>
+        </div>
+        <div>
+          <input type="checkbox" id="oceanicIncludeFern" checked>
+          <label for="oceanicIncludeFern">Silver Fern</label>
+        </div>
+        <div>
+          <input type="checkbox" id="oceanicIncludeKoru" checked>
+          <label for="oceanicIncludeKoru">Koru Spiral</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasWaves" checked>
+          <label for="hasWaves">Ocean Waves</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasIslands">
+          <label for="hasIslands">Island Silhouettes</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasCloudConnection">
+          <label for="hasCloudConnection">Cloud Connection Lines</label>
+        </div>
+      </div>
+
+      <div id="oceanicKiwiStyleContainer">
+        <label>Kiwi Style</label>
+        <select id="oceanicKiwiStyle">
+          <option value="flat">Flat Icon</option>
+          <option value="3d">3D</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Australia specific elements (initially hidden) -->
+    <div id="auElementsContainer" style="display:none;">
+      <label>Australian Elements</label>
+      <div class="checkbox-group">
+        <div>
+          <input type="checkbox" id="hasKangaroo" checked>
+          <label for="hasKangaroo">Kangaroo</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasBoomerang">
+          <label for="hasBoomerang">Boomerang</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasUluru">
+          <label for="hasUluru">Uluru/Ayers Rock</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasEucalyptus">
+          <label for="hasEucalyptus">Eucalyptus Leaves</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Singapore specific elements (initially hidden) -->
+    <div id="sgElementsContainer" style="display:none;">
+      <label>Singapore Elements</label>
+      <div class="checkbox-group">
+        <div>
+          <input type="checkbox" id="hasMerlion" checked>
+          <label for="hasMerlion">Merlion</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasGardensByTheBay">
+          <label for="hasGardensByTheBay">Gardens by the Bay</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasSkyline">
+          <label for="hasSkyline">Singapore Skyline</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasOrchid">
+          <label for="hasOrchid">Orchid Flower</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Philippines specific elements (initially hidden) -->
+    <div id="phElementsContainer" style="display:none;">
+      <label>Philippines Elements</label>
+      <div class="checkbox-group">
+        <div>
+          <input type="checkbox" id="hasPhilEagle" checked>
+          <label for="hasPhilEagle">Philippine Eagle</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasJeepney">
+          <label for="hasJeepney">Jeepney</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasSampaguita">
+          <label for="hasSampaguita">Sampaguita Flower</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasThreeStar">
+          <label for="hasThreeStar">Three Stars and Sun</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bengaluru specific elements (initially hidden) -->
+    <div id="bengaluruElementsContainer" style="display:none;">
+      <label>Bengaluru Elements</label>
+      <div class="checkbox-group">
+        <div>
+          <input type="checkbox" id="hasBangalorePalace" checked>
+          <label for="hasBangalorePalace">Bangalore Palace</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasLalbagh">
+          <label for="hasLalbagh">Lalbagh Botanical Garden</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasTechPattern">
+          <label for="hasTechPattern">Tech Circuit Pattern</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasElephant">
+          <label for="hasElephant">Elephant Motif</label>
+        </div>
+        <div>
+          <input type="checkbox" id="hasJasmine">
+          <label for="hasJasmine">Jasmine Flower</label>
+        </div>
+      </div>
+    </div>
+
+    <label>Character Style</label>
+    <select id="characterStyle">
+      <option value="pixar-3d">Pixar-style 3D Character</option>
+      <option value="superhero">AWS Superhero</option>
+      <option value="builder">AWS Builder</option>
+      <option value="architect">AWS Architect</option>
+      <option value="devops">AWS DevOps Engineer</option>
+      <option value="regular">Regular AWS Hoodie</option>
+    </select>
+
+    <label>Background Color</label>
+    <select id="backgroundColor">
+      <option value="sky-blue">Sky Blue</option>
+      <option value="aws-blue">AWS Dark Blue (#232F3E)</option>
+      <option value="aws-orange">AWS Orange (#FF9900)</option>
+      <option value="aws-smile">AWS Smile Gradient</option>
+      <option value="turquoise">Turquoise (NZ Ocean)</option>
+      <option value="aws-charcoal">AWS Charcoal</option>
+    </select>
+
+    <label>Border Color</label>
+    <select id="borderColor">
+      <option value="none">None</option>
+      <option value="aws-blue">AWS Blue</option>
+      <option value="aws-orange">AWS Orange</option>
+      <option value="aws-smile">AWS Smile Gradient</option>
+      <option value="gold">Gold</option>
+      <option value="silver">Silver</option>
+      <option value="black">Black</option>
+      <option value="white">White</option>
+    </select>
+
+    <label>Title Placement</label>
+    <select id="titlePlacement">
+      <option value="bottom">Bottom of Character</option>
+      <option value="top">Above Character</option>
+    </select>
+
+    <div class="button-group">
+      <button id="generateBtn" onclick="generate()">Generate Prompt</button>
+      <button id="copyBtn" onclick="copyPrompt()">Copy Prompt</button>
+      <button id="clearBtn" onclick="resetForm()">Clear Form</button>
+    </div>
+
+    <textarea id="output" readonly placeholder="Generated prompt will appear here..."></textarea>
+  </div>
+
+  <div id="toast" class="toast">Prompt copied to clipboard!</div>
+
+  <script>
+    // Initialize event handlers on page load
+    document.addEventListener('DOMContentLoaded', function () {
+      // Theme handling
+      const themeSelector = document.getElementById('themeSelector');
+
+      // Check for saved theme preference or use auto detection
+      const savedTheme = localStorage.getItem('theme') || 'auto';
+      themeSelector.value = savedTheme;
+
+      // Apply the theme
+      applyTheme(savedTheme);
+
+      // Listen for theme changes
+      themeSelector.addEventListener('change', function () {
+        const theme = this.value;
+        localStorage.setItem('theme', theme);
+        applyTheme(theme);
+      });
+
+      // System preference change detection
+      if (window.matchMedia) {
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        prefersDarkScheme.addEventListener('change', function () {
+          if (themeSelector.value === 'auto') {
+            applyTheme('auto');
+          }
+        });
+      }
+
+      // Initialize title dropdown handler
+      document.getElementById('title').addEventListener('change', function () {
+        const customTitleContainer = document.getElementById('customTitleContainer');
+        if (this.value === 'custom') {
+          customTitleContainer.style.display = 'block';
+        } else {
+          customTitleContainer.style.display = 'none';
+        }
+      });
+
+      // Initialize the rest of the event handlers
+      document.getElementById('characterCreationType').addEventListener('change', function () {
+        const generatedOptions = document.getElementById('generatedCharacterOptions');
+        const referenceOptions = document.getElementById('referencePhotoOptions');
+
+        if (this.value === 'generated') {
+          generatedOptions.style.display = 'block';
+          referenceOptions.style.display = 'none';
+        } else {
+          generatedOptions.style.display = 'none';
+          referenceOptions.style.display = 'block';
+        }
+      });
+
+      document.getElementById('chestIcon').addEventListener('change', function () {
+        const customIconContainer = document.getElementById('customIconContainer');
+        if (this.value === 'custom') {
+          customIconContainer.style.display = 'block';
+        } else {
+          customIconContainer.style.display = 'none';
+        }
+      });
+
+      document.getElementById('location').addEventListener('change', function () {
+        const customLocationContainer = document.getElementById('customLocationContainer');
+        const nzElementsContainer = document.getElementById('nzElementsContainer');
+        const oceanicElementsContainer = document.getElementById('oceanicElementsContainer');
+        const auElementsContainer = document.getElementById('auElementsContainer');
+        const sgElementsContainer = document.getElementById('sgElementsContainer');
+        const phElementsContainer = document.getElementById('phElementsContainer');
+        const bengaluruElementsContainer = document.getElementById('bengaluruElementsContainer');
+
+        customLocationContainer.style.display = 'none';
+        nzElementsContainer.style.display = 'none';
+        oceanicElementsContainer.style.display = 'none';
+        auElementsContainer.style.display = 'none';
+        sgElementsContainer.style.display = 'none';
+        phElementsContainer.style.display = 'none';
+        bengaluruElementsContainer.style.display = 'none';
+
+        if (this.value === 'custom') {
+          customLocationContainer.style.display = 'block';
+        } else if (this.value === 'Aotearoa') {
+          nzElementsContainer.style.display = 'block';
+        } else if (this.value === 'Oceanic') {
+          oceanicElementsContainer.style.display = 'block';
+        } else if (this.value === 'Australia') {
+          auElementsContainer.style.display = 'block';
+        } else if (this.value === 'Singapore') {
+          sgElementsContainer.style.display = 'block';
+        } else if (this.value === 'Philippines') {
+          phElementsContainer.style.display = 'block';
+        } else if (this.value === 'Bengaluru') {
+          bengaluruElementsContainer.style.display = 'block';
+        }
+      });
+
+      document.getElementById('showKiwi').addEventListener('change', function () {
+        const kiwiStyleContainer = document.getElementById('kiwiStyleContainer');
+        if (this.checked) {
+          kiwiStyleContainer.style.display = 'block';
+        } else {
+          kiwiStyleContainer.style.display = 'none';
+        }
+      });
+
+      document.getElementById('oceanicShowKiwi').addEventListener('change', function () {
+        const oceanicKiwiStyleContainer = document.getElementById('oceanicKiwiStyleContainer');
+        if (this.checked) {
+          oceanicKiwiStyleContainer.style.display = 'block';
+        } else {
+          oceanicKiwiStyleContainer.style.display = 'none';
+        }
+      });
+    });
+
+    function applyTheme(theme) {
+      if (theme === 'auto') {
+        // Check system preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+    }
+
+    function generate() {
+      const name = document.getElementById("name").value;
+
+      // Get title (either from dropdown or custom input)
+      let title = document.getElementById("title").value;
+      if (title === 'custom') {
+        title = document.getElementById("customTitle").value || "Solutions Architect";
+      }
+
+      const sessionTitle = document.getElementById("sessionTitle").value;
+
+      // Get chest icon (either from dropdown or custom input)
+      let chestIcon = document.getElementById("chestIcon").value;
+      if (chestIcon === 'custom') {
+        chestIcon = document.getElementById("customIcon").value || "AWS";
+      }
+
+      // Get location (either from dropdown or custom input)
+      let location = document.getElementById("location").value;
+      if (location === 'custom') {
+        location = document.getElementById("customLocation").value || "Aotearoa";
+      }
+
+      const characterStyle = document.getElementById("characterStyle").value;
+      const backgroundColor = document.getElementById("backgroundColor").value;
+      const borderColor = document.getElementById("borderColor").value;
+      const titlePlacement = document.getElementById("titlePlacement").value;
+      const characterCreationType = document.getElementById("characterCreationType").value;
+
+      // Character description based on creation type
+      let characterDesc = "";
+
+      if (characterCreationType === "reference") {
+        characterDesc = "a stylized character based on the reference photo provided in the conversation";
+      } else {
+        const characterGender = document.getElementById("characterGender").value;
+
+        // Get checkbox values for character features
+        const hasGlasses = document.getElementById("hasGlasses").checked;
+        const hasBeard = document.getElementById("hasBeard").checked;
+        const hasEarrings = document.getElementById("hasEarrings").checked;
+        const hasNecklace = document.getElementById("hasNecklace").checked;
+        const hairStyle = document.getElementById("hairStyle").value;
+
+        // Character description based on gender and selected style
+        let genderDesc = "";
+        if (characterGender === "male") {
+          genderDesc = "male presenting";
+        } else if (characterGender === "female") {
+          genderDesc = "female presenting";
+        } else {
+          genderDesc = "gender-neutral";
+        }
+
+        // Character description based on selected style
+        if (characterStyle === "pixar-3d") {
+          characterDesc = `a Pixar-style 3D ${genderDesc} character with a friendly face, large eyes, and simplified proportions`;
+        } else if (characterStyle === "superhero") {
+          characterDesc = `a ${genderDesc} superhero character with a blue suit, orange/red cape, yellow belt, and red boots`;
+        } else if (characterStyle === "builder") {
+          characterDesc = `a ${genderDesc} AWS Builder with construction/hard hat, tool belt, and AWS-branded workwear`;
+        } else if (characterStyle === "architect") {
+          characterDesc = `a ${genderDesc} AWS Architect with neat attire, blueprint or tablet in hand, and architect-style glasses`;
+        } else if (characterStyle === "devops") {
+          characterDesc = `a ${genderDesc} DevOps Engineer with casual tech attire, possibly holding a gear/cog and laptop`;
+        } else {
+          characterDesc = `a ${genderDesc} friendly AWS-branded character in a grey AWS hoodie`;
+        }
+
+        // Additional character features
+        const featuresList = [];
+
+        // Hair description
+        let hairDesc = "";
+        switch (hairStyle) {
+          case "bald":
+            hairDesc = "with a bald/shaven head";
+            break;
+          case "short":
+            hairDesc = "with short hair";
+            break;
+          case "medium":
+            hairDesc = "with medium-length hair";
+            break;
+          case "long":
+            hairDesc = "with long flowing hair";
+            break;
+          case "spiky":
+            hairDesc = "with spiky hair";
+            break;
+          case "flatTop":
+            hairDesc = "with a flat top haircut";
+            break;
+          case "curly":
+            hairDesc = "with curly hair";
+            break;
+          case "afro":
+            hairDesc = "with an afro hairstyle";
+            break;
+          case "bun":
+            hairDesc = "with hair in a bun/topknot";
+            break;
+          case "ponytail":
+            hairDesc = "with hair in a ponytail";
+            break;
+          case "undercut":
+            hairDesc = "with an undercut hairstyle";
+            break;
+          case "sidepart":
+            hairDesc = "with a side-parted hairstyle";
+            break;
+        }
+
+        if (hairDesc) featuresList.push(hairDesc);
+        if (hasGlasses) featuresList.push("wearing glasses");
+        if (hasBeard && characterGender !== "female") featuresList.push("with facial hair/beard");
+        if (hasEarrings) featuresList.push("wearing earrings");
+        if (hasNecklace) featuresList.push("with a necklace");
+
+        const featuresDesc = featuresList.length > 0 ? ", " + featuresList.join(", ") : "";
+        characterDesc += featuresDesc;
+      }
+
+      // Background description
+      let bgDesc = "";
+      if (backgroundColor === "sky-blue") {
+        bgDesc = "bright sky-blue background with soft cloud patterns";
+      } else if (backgroundColor === "aws-blue") {
+        bgDesc = "AWS dark blue (#232F3E) background with subtle tech-themed pattern";
+      } else if (backgroundColor === "aws-orange") {
+        bgDesc = "AWS orange (#FF9900) background with lighter orange gradient elements";
+      } else if (backgroundColor === "aws-smile") {
+        bgDesc = "gradient background mimicking the AWS smile curve, transitioning from dark blue to orange";
+      } else if (backgroundColor === "aws-charcoal") {
+        bgDesc = "AWS charcoal/slate background with subtle tech grid lines";
+      } else {
+        bgDesc = "turquoise background (representing New Zealand waters) with light tech pattern overlay";
+      }
+
+      // Border description
+      let borderDesc = "";
+      if (borderColor !== "none") {
+        if (borderColor === "aws-blue") {
+          borderDesc = "with an AWS dark blue (#232F3E) border";
+        } else if (borderColor === "aws-orange") {
+          borderDesc = "with an AWS orange (#FF9900) border";
+        } else if (borderColor === "aws-smile") {
+          borderDesc = "with an AWS smile gradient border (transitioning from dark blue to orange)";
+        } else {
+          borderDesc = `with a ${borderColor} border`;
+        }
+      }
+
+      // Title placement
+      let titleDesc = "";
+      if (titlePlacement === "bottom") {
+        titleDesc = "The session title appears at the bottom of the character on a rounded rectangular label";
+      } else {
+        titleDesc = "The session title appears above the character in bold text on a rounded rectangular label";
+      }
+
+      // Regional elements based on selected location
+      const regionElementsList = [];
+
+      if (location === "Aotearoa") {
+        // New Zealand elements
+        const showKiwi = document.getElementById("showKiwi").checked;
+        const kiwiStyle = showKiwi ? document.getElementById("kiwiStyle").value : "flat";
+        const includeKoru = document.getElementById("includeKoru").checked;
+        const includeFern = document.getElementById("includeFern").checked;
+        const hasMountains = document.getElementById("hasMountains").checked;
+        const hasFlax = document.getElementById("hasFlax").checked;
+        const hasTiki = document.getElementById("hasTiki").checked;
+        const hasWave = document.getElementById("hasWave").checked;
+
+        if (includeKoru) regionElementsList.push("Koru spiral patterns subtly integrated into the background design");
+        if (includeFern) regionElementsList.push("Silver fern motif appears along one edge of the packaging");
+        if (hasMountains) regionElementsList.push("Stylized mountain silhouette (representing NZ's Southern Alps) in the distance");
+        if (hasFlax) regionElementsList.push("New Zealand flax (harakeke) plant elements in corners");
+        if (hasTiki) regionElementsList.push("Subtle tiki pattern elements integrated into the border design");
+        if (hasWave) regionElementsList.push("Ocean wave pattern at the bottom of the card (representing NZ's coastline)");
+
+        if (showKiwi) {
+          regionElementsList.push(`A stylized kiwi bird (${kiwiStyle}) appears ${kiwiStyle === "3d" ? "next to the character" : "as a silhouette in the background"}`);
+        }
+      } else if (location === "Oceanic") {
+        // Oceanic elements
+        const oceanicShowKiwi = document.getElementById("oceanicShowKiwi").checked;
+        const oceanicKiwiStyle = oceanicShowKiwi ? document.getElementById("oceanicKiwiStyle").value : "flat";
+        const oceanicIncludeKoru = document.getElementById("oceanicIncludeKoru").checked;
+        const oceanicIncludeFern = document.getElementById("oceanicIncludeFern").checked;
+        const hasWaves = document.getElementById("hasWaves").checked;
+        const hasIslands = document.getElementById("hasIslands").checked;
+        const hasCloudConnection = document.getElementById("hasCloudConnection").checked;
+
+        if (oceanicIncludeKoru) regionElementsList.push("Koru spiral patterns subtly integrated into the background design");
+        if (oceanicIncludeFern) regionElementsList.push("Silver fern motif appears along one edge of the packaging");
+        if (hasWaves) regionElementsList.push("Prominent ocean waves pattern symbolizing remote connectivity");
+        if (hasIslands) regionElementsList.push("Small island silhouettes scattered in the background");
+        if (hasCloudConnection) regionElementsList.push("Cloud connection lines showing remote digital connectivity");
+
+        if (oceanicShowKiwi) {
+          regionElementsList.push(`A stylized kiwi bird (${oceanicKiwiStyle}) appears ${oceanicKiwiStyle === "3d" ? "next to the character" : "as a silhouette in the background"}`);
+        }
+      } else if (location === "Australia") {
+        // Australia elements
+        const hasKangaroo = document.getElementById("hasKangaroo").checked;
+        const hasBoomerang = document.getElementById("hasBoomerang").checked;
+        const hasUluru = document.getElementById("hasUluru").checked;
+        const hasEucalyptus = document.getElementById("hasEucalyptus").checked;
+
+        if (hasKangaroo) regionElementsList.push("A stylized kangaroo silhouette visible in the background");
+        if (hasBoomerang) regionElementsList.push("Boomerang design element integrated into the border");
+        if (hasUluru) regionElementsList.push("Subtle silhouette of Uluru/Ayers Rock in the distance");
+        if (hasEucalyptus) regionElementsList.push("Eucalyptus leaf patterns in the corners");
+      } else if (location === "Singapore") {
+        // Singapore elements
+        const hasMerlion = document.getElementById("hasMerlion").checked;
+        const hasGardensByTheBay = document.getElementById("hasGardensByTheBay").checked;
+        const hasSkyline = document.getElementById("hasSkyline").checked;
+        const hasOrchid = document.getElementById("hasOrchid").checked;
+
+        if (hasMerlion) regionElementsList.push("Merlion silhouette integrated into the design");
+        if (hasGardensByTheBay) regionElementsList.push("Gardens by the Bay super-tree motifs in the background");
+        if (hasSkyline) regionElementsList.push("Singapore skyline silhouette along the bottom edge");
+        if (hasOrchid) regionElementsList.push("Orchid flower (Vanda Miss Joaquim) elements in the corners");
+      } else if (location === "Philippines") {
+        // Philippines elements
+        const hasPhilEagle = document.getElementById("hasPhilEagle").checked;
+        const hasJeepney = document.getElementById("hasJeepney").checked;
+        const hasSampaguita = document.getElementById("hasSampaguita").checked;
+        const hasThreeStar = document.getElementById("hasThreeStar").checked;
+
+        if (hasPhilEagle) regionElementsList.push("Philippine Eagle silhouette in the background");
+        if (hasJeepney) regionElementsList.push("Colorful Jeepney design element integrated into the border");
+        if (hasSampaguita) regionElementsList.push("Sampaguita flower pattern in the corners");
+        if (hasThreeStar) regionElementsList.push("Three stars and sun emblem subtly incorporated into the design");
+      } else if (location === "Bengaluru") {
+        // Bengaluru elements
+        const hasBangalorePalace = document.getElementById("hasBangalorePalace").checked;
+        const hasLalbagh = document.getElementById("hasLalbagh").checked;
+        const hasTechPattern = document.getElementById("hasTechPattern").checked;
+        const hasElephant = document.getElementById("hasElephant").checked;
+        const hasJasmine = document.getElementById("hasJasmine").checked;
+
+        if (hasBangalorePalace) regionElementsList.push("Bangalore Palace silhouette in the background");
+        if (hasLalbagh) regionElementsList.push("Lalbagh Glass House motif subtly integrated into the design");
+        if (hasTechPattern) regionElementsList.push("Tech circuit pattern representing Bengaluru's Silicon Valley status");
+        if (hasElephant) regionElementsList.push("Traditional Karnataka elephant motif incorporated into the design");
+        if (hasJasmine) regionElementsList.push("Jasmine flower (local cultural symbol) elements in the corners");
+      }
+
+      const regionElementsSection = regionElementsList.length > 0 ?
+        `REGIONAL ELEMENTS (${location.toUpperCase()}):\n- ` + regionElementsList.join("\n- ") :
+        `REGIONAL ELEMENTS (${location.toUpperCase()}):\n- Minimal regional elements included`;
+
+      let output = `Create a detailed mock-up of an AWS Community Day ${location} speaker card in the style of a mint-in-box action figure packaging. The design should be consistent with the following specific details:
+
+SPEAKER DETAILS:
+- Name: ${name}
+- Title: ${title}
+- Session: ${sessionTitle}
+- AWS Icon/Logo to feature: ${chestIcon}
+
+PACKAGING STRUCTURE:
+- Clear blister packaging with a character visible through transparent plastic
+- Hanging tab/hole at the top center
+- Overall card dimensions approximating a standard action figure package (roughly 6:9 ratio)
+- ${bgDesc} ${borderDesc}
+- Gloss finish with subtle highlights on the plastic bubble
+
+CHARACTER:
+- ${characterDesc}
+- The character has an approachable, friendly expression
+- The chest/shirt prominently features ${chestIcon === "AWS" ? "the AWS logo" : "a " + chestIcon + " icon"}
+- ${titleDesc}
+
+${regionElementsSection}
+
+TEXT LAYOUT:
+- The speaker's name "${name}" appears in large, white, bold text at the top
+- The title "${title}" appears in gold/orange text beneath the name
+- AWS logo appears at the bottom with "COMMUNITY DAY" in uppercase orange letters
+- "${location}" appears in the bottom area in title case
+
+IMPORTANT STYLING NOTES:
+- Use Amazon Ember font family throughout
+- The overall aesthetic is polished, professional 3D rendering
+- Maintain AWS brand colors: primary navy blue (#232F3E), orange (#FF9900), and white
+- The character should have a friendly, approachable expression
+- No copy/text beyond what is specified
+
+OUTPUT FORMAT:
+- High-quality 3D render
+- PNG with FULL transparency (alpha channel) - the image should have no white background at all, only the card itself should be visible`;
+
+      document.getElementById("output").value = output;
+    }
+
+    function copyPrompt() {
+      const output = document.getElementById("output");
+      if (!output.value) {
+        showToast("Generate a prompt first!");
+        return;
+      }
+
+      output.select();
+      document.execCommand("copy");
+      showToast("Prompt copied to clipboard!");
+    }
+
+    function resetForm() {
+      // Reset basic inputs
+      document.getElementById("name").value = "";
+      document.getElementById("sessionTitle").value = "";
+
+      // Reset dropdowns
+      document.getElementById("title").value = "Solutions Architect";
+      document.getElementById("customTitle").value = "";
+      document.getElementById("customTitleContainer").style.display = "none";
+
+      document.getElementById("characterCreationType").value = "generated";
+      document.getElementById("generatedCharacterOptions").style.display = "block";
+      document.getElementById("referencePhotoOptions").style.display = "none";
+
+      document.getElementById("characterGender").value = "neutral";
+      document.getElementById("hairStyle").value = "bald";
+
+      document.getElementById("chestIcon").value = "Lambda";
+      document.getElementById("customIcon").value = "";
+      document.getElementById("customIconContainer").style.display = "none";
+
+      document.getElementById("location").value = "Aotearoa";
+      document.getElementById("nzElementsContainer").style.display = "block";
+      document.getElementById("oceanicElementsContainer").style.display = "none";
+      document.getElementById("auElementsContainer").style.display = "none";
+      document.getElementById("sgElementsContainer").style.display = "none";
+      document.getElementById("phElementsContainer").style.display = "none";
+      document.getElementById("bengaluruElementsContainer").style.display = "none";
+      document.getElementById("customLocationContainer").style.display = "none";
+
+      document.getElementById("characterStyle").value = "pixar-3d";
+      document.getElementById("backgroundColor").value = "sky-blue";
+      document.getElementById("borderColor").value = "none";
+      document.getElementById("titlePlacement").value = "bottom";
+
+      // Reset checkboxes
+      document.getElementById("hasGlasses").checked = true;
+      document.getElementById("hasBeard").checked = false;
+      document.getElementById("hasEarrings").checked = false;
+      document.getElementById("hasNecklace").checked = false;
+
+      // Reset New Zealand elements
+      document.getElementById("showKiwi").checked = true;
+      document.getElementById("kiwiStyle").value = "flat";
+      document.getElementById("kiwiStyleContainer").style.display = "block";
+      document.getElementById("includeKoru").checked = true;
+      document.getElementById("includeFern").checked = true;
+      document.getElementById("hasMountains").checked = false;
+      document.getElementById("hasFlax").checked = false;
+      document.getElementById("hasTiki").checked = false;
+      document.getElementById("hasWave").checked = false;
+
+      // Reset textarea
+      document.getElementById("output").value = "";
+
+      // Show a success message
+      showToast("Form has been reset to defaults");
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.style.display = "block";
+
+      setTimeout(() => {
+        toast.style.display = "none";
+      }, 3000);
+    }
+  </script>
+</body>
+
+</html>
